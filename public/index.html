@@ -11,45 +11,72 @@
        
     </div>
     <script>
-        const todos = [
-            {
-                task: 'do something-1',
-                id: 1
-            },
-            {
-                task: 'do something-2',
-                id: 2
-            },
-            {
-                task: 'do something-3',
-                id: 3
-            }
-        ]
+        
         const app =document.getElementById('app');
 
         const delTodo = (id) => {
-            fetch('/del', id);
+            console.log(id)
+            fetch(`/api/todos/${id}`, {
+                method: 'delete'
+            })
+            .then(response => {
+                console.log(response)
+                return response.json()
+            })
+            .then(response => insertTo(app, todoForm() + Ul(response.map((obj, index) => makeTodo(obj, index)).join(' '))))
+            .catch(err => console.log(err));
         }
         const changeTodo = (id, task) => {
+            
             console.log(`change ${id}, ${task}`)
             const button = document.getElementById('add');
             const input = document.getElementById('todo');
             input.value = task;
-            button.innerText = 'Change'
+            button.innerText = 'Change';
+            button.onclick = function(){
+            task = document.getElementById('todo').value;
+            fetch('/api/todos/' + id, {
+                method: 'put',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({task})
+            })
+            .then(response => response.json())
+            .then(response => insertTo(app, todoForm() + Ul(response.map((obj, index) => makeTodo(obj, index)).join(' '))))
+            .catch(err => console.log(err));                
+            }
         }
-        const insertTo = (parent, component) => parent.innerHTML += component;
-        const makeTodo = ({task, id}) => `
-            <li>${id} : ${task} 
-            <button onclick="changeTodo(${id}, ${task})">Edit </button>
-            <button onclick="delTodo(${id})">Delete </button></li>`;
+        const addTodo = () => {
+            task = document.getElementById('todo').value;
+            fetch('/api/todos', {
+                method: 'post',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({task})
+            })
+            .then(response => response.json())
+            .then(response => insertTo(app, todoForm() + Ul(response.map((obj, index) => makeTodo(obj, index)).join(' '))))
+            .catch(err => console.log(err));
+        }
+        const insertTo = (parent, component) => parent.innerHTML = component;
+        const makeTodo = ({task}, id) => {
+            console.log(task, id)
+            return `
+            <li> ${task} 
+            <button onclick="changeTodo(${id}, '${task}')">Edit </button>
+            <button onclick="delTodo(${id})">Delete </button></li>`
+
+        };
         const Ul = (li) => `<ul>${li}</ul>`
         const todoForm = () => `
-            <form type="post" action="/add">
                 <input type="text" placeholder="todo" id="todo">
-                <button type="submit" id="add">add todo</button>
-            </form>`
-        insertTo(app, todoForm())
-        insertTo(app, Ul(todos.map((obj) => makeTodo(obj)).join(' ')))
+                <button type="button" onclick="addTodo()" id="add">add todo</button>
+           `
+        fetch('/api/todos')
+        .then(response => response.json())
+        .then(response => insertTo(app, todoForm() + Ul(response.map((obj, index) => makeTodo(obj, index)).join(' ')))); 
 
     </script>
 </body>
