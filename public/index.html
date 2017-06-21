@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta task="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Todo</title>
+</head>
+<body>
+    <div id="app">
+       
+    </div>
+    <script>
+        const todos = [
+            {
+                task: 'do something-1',
+                id: 1
+            },
+            {
+                task: 'do something-2',
+                id: 2
+            },
+            {
+                task: 'do something-3',
+                id: 3
+            }
+        ]
+        const app =document.getElementById('app');
+
+        const delTodo = (id) => {
+            fetch('/del', id);
+        }
+        const changeTodo = (id, task) => {
+            console.log(`change ${id}, ${task}`)
+            const button = document.getElementById('add');
+            const input = document.getElementById('todo');
+            input.value = task;
+            button.innerText = 'Change'
+        }
+        const insertTo = (parent, component) => parent.innerHTML += component;
+        const makeTodo = ({task, id}) => `
+            <li>${id} : ${task} 
+            <button onclick="changeTodo(${id}, ${task})">Edit </button>
+            <button onclick="delTodo(${id})">Delete </button></li>`;
+        const Ul = (li) => `<ul>${li}</ul>`
+        const todoForm = () => `
+            <form type="post" action="/add">
+                <input type="text" placeholder="todo" id="todo">
+                <button type="submit" id="add">add todo</button>
+            </form>`
+        insertTo(app, todoForm())
+        insertTo(app, Ul(todos.map((obj) => makeTodo(obj)).join(' ')))
+
+    </script>
+</body>
+</html>
