@@ -14,36 +14,38 @@
         
         const app =document.getElementById('app');
 
-        const delTodo = (id) => {
-            console.log(id)
-            fetch(`/api/todos/${id}`, {
-                method: 'delete'
+        const delTodo = (_id) => {
+            console.log(_id)
+            fetch(`/api/todos/${_id}`, {
+                method: 'delete',
+                credentials: 'include',
             })
             .then(response => {
                 console.log(response)
                 return response.json()
             })
-            .then(response => insertTo(app, todoForm() + Ul(response.map((obj, index) => makeTodo(obj, index)).join(' '))))
+            .then(response => insertTo(app, todoForm() + Ul(response.map((obj) => makeTodo(obj)).join(' '))))
             .catch(err => console.log(err));
         }
-        const changeTodo = (id, task) => {
+        const changeTodo = (_id, task) => {
             
-            console.log(`change ${id}, ${task}`)
+            console.log(`change ${_id}, ${task}`)
             const button = document.getElementById('add');
             const input = document.getElementById('todo');
             input.value = task;
             button.innerText = 'Change';
             button.onclick = function(){
             task = document.getElementById('todo').value;
-            fetch('/api/todos/' + id, {
+            fetch('/api/todos/' + _id, {
                 method: 'put',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({task})
             })
             .then(response => response.json())
-            .then(response => insertTo(app, todoForm() + Ul(response.map((obj, index) => makeTodo(obj, index)).join(' '))))
+            .then(response => insertTo(app, todoForm() + Ul(response.map((obj) => makeTodo(obj)).join(' '))))
             .catch(err => console.log(err));                
             }
         }
@@ -51,9 +53,12 @@
             task = document.getElementById('todo').value;
             fetch('/api/todos', {
                 method: 'post',
+                credentials: 'include',
                 headers: {
+                    
                     'Content-Type': 'application/json'
                 },
+
                 body: JSON.stringify({task})
             })
             .then(response => response.json())
@@ -61,12 +66,11 @@
             .catch(err => console.log(err));
         }
         const insertTo = (parent, component) => parent.innerHTML = component;
-        const makeTodo = ({task}, id) => {
-            console.log(task, id)
+        const makeTodo = ({task, _id}) => {
             return `
             <li> ${task} 
-            <button onclick="changeTodo(${id}, '${task}')">Edit </button>
-            <button onclick="delTodo(${id})">Delete </button></li>`
+            <button onclick="changeTodo('${_id}', '${task}')">Edit </button>
+            <button onclick="delTodo('${_id}')">Delete </button></li>`
 
         };
         const Ul = (li) => `<ul>${li}</ul>`
@@ -76,7 +80,7 @@
            `
         fetch('/api/todos')
         .then(response => response.json())
-        .then(response => insertTo(app, todoForm() + Ul(response.map((obj, index) => makeTodo(obj, index)).join(' ')))); 
+        .then(response => console.log(response) || insertTo(app, todoForm() + Ul(response.map((obj) => makeTodo(obj)).join(' ')))); 
 
     </script>
 </body>
